@@ -42,7 +42,7 @@ Aborting...
       exit 1
     fi
   else
-    echo "Patch already applied, skipping."
+    echo "Patch $2 already applied, skipping."
   fi
 }
 
