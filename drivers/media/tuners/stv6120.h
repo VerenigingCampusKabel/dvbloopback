@@ -2,7 +2,7 @@
 #define STV6120_H
 
 #include <linux/i2c.h>
-#include <media/dvb_frontend.h>
+#include "dvb_frontend.h"
 
 struct stv6120_cfg {
 	u8 adr;

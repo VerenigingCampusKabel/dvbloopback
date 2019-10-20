@@ -33,7 +33,7 @@
 #include <linux/version.h>
 #include <asm/div64.h>
 
-#include <media/dvb_frontend.h>
+#include "dvb_frontend.h"
 #include "stv091x.h"
 #include "stv091x_regs.h"
 
