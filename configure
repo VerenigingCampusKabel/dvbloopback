@@ -30,14 +30,20 @@ run ./configure --help for valid options\E[0m
 }
 
 _patch(){
-if ! [ "$?" -eq 0 ]; then
-  echo "
+  patch -p $1 -N -s --dry-run < $2 2> /dev/null
+  if [ $? -eq 0 ]; then
+    patch -p $1 < $2
+    if ! [ "$?" -eq 0 ]; then
+      echo "
 Could not apply the patch.
 Aborting...
 "
-  env_clean
-  exit 1
-fi
+      env_clean
+      exit 1
+    fi
+  else
+    echo "Patch already applied, skipping."
+  fi
 }
 
 confirmno(){
@@ -858,14 +864,11 @@ fi
 if [ "x$dvbloopback_opt" = "xyes" ]; then
   mkdir -p drivers/media/pci/dvbloopback
   cp -f ../dvbloopback/* drivers/media/pci/dvbloopback/
-  patch -p1 < ../dvbloopback.patch
-  _patch
+  _patch 1 "../dvbloopback.patch"
   if [ "$VERSION" -lt 313 ]; then
-    patch -p0 < ../3.7-dvb-core.patch
-    _patch
+    _patch 0 "../3.7-dvb-core.patch"
   else
-    patch -p0 < ../3.13-dvb-core.patch
-    _patch
+    _patch 0 "../3.13-dvb-core.patch"
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -885,8 +888,7 @@ dvb-core is patched, dvbloopback added.
 
   # 4.5-linux patch
   if [ "$VERSION" -gt 404 ]; then
-    patch -p0 < ../4.5-linux.patch
-    _patch
+    _patch 0 "../4.5-linux.patch"
     if [ "x$debug_opt" = "xyes" ]; then
       echo "
 dvbloopback module is patched for kernel series 4.5.x and up.
@@ -906,23 +908,17 @@ if [ "x$drivers_opt" = "xyes" ];then
   mkdir -p drivers/media/pci/saa716x
   cp -f ../drivers/media/pci/saa716x/* drivers/media/pci/saa716x/
   if [ "$VERSION" -eq 310 ];then
-    patch -p0 < ../Kconfig-3.10.patch
-    _patch
+    _patch 0 "../Kconfig-3.10.patch"
   elif [ "$VERSION" -lt 400 ];then
-    patch -p0 < ../Kconfig.patch
-    _patch
+    _patch 0 "../Kconfig.patch"
   elif [ "$VERSION" -lt 402 ]; then
-    patch -p0 < ../Kconfig.patch
-    _patch
+    _patch 0 "../Kconfig.patch"
   elif [ "$VERSION" -lt 405 ]; then
-    patch -p0 < ../Kconfig-4.2.patch
-    _patch
+    _patch 0 "../Kconfig-4.2.patch"
   elif [ "$VERSION" -lt 410 ]; then
-    patch -p0 < ../Kconfig-4.5.patch
-    _patch
+    _patch 0 "../Kconfig-4.5.patch"
   else
-    patch -p0 < ../Kconfig-4.10.patch
-    _patch
+    _patch 0 "../Kconfig-4.10.patch"
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -935,20 +931,15 @@ saa716x added, Kconfig patched for saa716x.
     fi
   fi
   if [ "$VERSION" -eq 316 ]; then
-    patch -p0 < ../Makefile-3.16.patch
-    _patch
+    _patch 0 "../Makefile-3.16.patch"
   elif [ "$VERSION" -eq 310 ]; then
-    patch -p0 < ../Makefile-3.10.patch
-    _patch
+    _patch 0 "../Makefile-3.10.patch"
   elif [ "$VERSION" -lt 400 ]; then
-    patch -p0 < ../Makefile.patch
-    _patch
+    _patch 0 "../Makefile.patch"
   elif [ "$VERSION" -lt 402 ]; then
-    patch -p0 < ../Makefile.patch
-    _patch
+    _patch 0 "../Makefile.patch"
   else
-    patch -p0 < ../Makefile-4.2.patch
-    _patch
+    _patch 0 "../Makefile-4.2.patch"
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     echo "
@@ -966,14 +957,11 @@ fi
 # cx23885 patch
 if [ "x$drivers_opt" = "xyes" ];then
   if [ "$VERSION" -eq 316 ]; then
-    patch -p0 < ../cx23885-3.16.patch
-    _patch
+    _patch 0 "../cx23885-3.16.patch"
   elif [ "$VERSION" -eq 310 ]; then
-    patch -p0 < ../cx23885-3.10.patch
-    _patch
+    _patch 0 "../cx23885-3.10.patch"
   elif [ "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
-    patch -p0 < ../cx23885-4.0.patch
-    _patch
+    _patch 0 "../cx23885-4.0.patch"
   fi
   if [ "x$debug_opt" = "xyes" ]; then
     if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 -o "$VERSION" -eq 400 -o "$VERSION" -eq 401 ]; then
@@ -1053,11 +1041,9 @@ fi
 # Common (stock and vanilla kernels)
 # gcc patch
 if [ "$VERSION" -eq 316 ]; then
-  patch -p0 < ../mod_devicetable.patch
-  _patch
+  _patch 0 "../mod_devicetable.patch"
 elif [ "$VERSION" -eq 310 ]; then
-  patch -p0 < ../gcc310.patch
-  _patch
+  _patch 0 "../gcc310.patch"
 fi
 if [ "$VERSION" -eq 310 -o "$VERSION" -eq 316 ]; then
   if [ "x$debug_opt" = "xyes" ]; then
@@ -1075,11 +1061,9 @@ fi
 # Common (stock and vanilla kernels)
 # mediacontroller patch
 if [ "$VERSION" -gt 404 -a "$VERSION" -lt 410 ]; then
-  patch -p0 < ../mediacontroller.patch
-  _patch
+  _patch 0 "../mediacontroller.patch"
 elif [ "$VERSION" -gt 409 ]; then
-  patch -p0 < ../mediacontroller4.10.patch
-  _patch
+  _patch 0 "../mediacontroller4.10.patch"
 fi
 if [ "$VERSION" -gt 404 ]; then
   if [ "x$debug_opt" = "xyes" ]; then
