@@ -952,8 +952,8 @@ Makefile is patched for saa716x.
     fi
   fi
 
-  cp -f ../drivers/media/dvb-frontends/tas2101* drivers/media/dvb-frontends/
-  cp -f ../drivers/media/tuners/av201x* drivers/media/tuners/
+  cp -f ../drivers/media/dvb-frontends/{isl6422,stv091x,tas2101}* drivers/media/dvb-frontends/
+  cp -f ../drivers/media/tuners/{av201x,stv6120}* drivers/media/tuners/
   _patch 0 "../saa716x.patch"
 fi
 
