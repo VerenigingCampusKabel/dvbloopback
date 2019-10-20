@@ -75,7 +75,7 @@
 +	  STV6120 silicon tuner driver.
  endmenu
 --- include/uapi/linux/dvb/frontend.h	2018-01-28 22:20:33.000000000 +0100
-+++ include/uapi/linux/dvb/frontend.h	2019-10-20 18:38:13.689636558 +0200
++++ include/uapi/linux/dvb/frontend.h	2019-10-20 19:02:08.196376521 +0200
 @@ -313,6 +313,8 @@
  	FEC_3_5,
  	FEC_9_10,
@@ -85,7 +85,19 @@
  };
  
  /**
-@@ -1006,4 +1008,34 @@
+@@ -547,7 +549,10 @@
+ #define DTV_STAT_ERROR_BLOCK_COUNT	68
+ #define DTV_STAT_TOTAL_BLOCK_COUNT	69
+ 
+-#define DTV_MAX_COMMAND		DTV_STAT_TOTAL_BLOCK_COUNT
++/* Physical layer scrambling */
++#define DTV_SCRAMBLING_SEQUENCE_INDEX	70
++
++#define DTV_MAX_COMMAND		DTV_SCRAMBLING_SEQUENCE_INDEX
+ 
+ /**
+  * enum fe_pilot - Type of pilot tone
+@@ -1006,4 +1011,34 @@
  
  #endif
  
@@ -120,6 +132,7 @@
 +#define FE_REGI2C_WRITE   _IOW('o', 95, struct usbi2c_access)
 +
  #endif /*_DVBFRONTEND_H_*/
+
 --- drivers/media/dvb-core/dvb_frontend.h	2018-01-28 22:20:33.000000000 +0100
 +++ drivers/media/dvb-core/dvb_frontend.h	2019-10-20 18:30:32.303551961 +0200
 @@ -461,6 +461,15 @@
