@@ -73,7 +73,6 @@
 +	default m if !MEDIA_SUBDRV_AUTOSELECT
 +	help
 +	  STV6120 silicon tuner driver.
-
  endmenu
 --- include/uapi/linux/dvb/frontend.h	2018-01-28 22:20:33.000000000 +0100
 +++ include/uapi/linux/dvb/frontend.h	2019-10-20 16:52:40.598804941 +0200
