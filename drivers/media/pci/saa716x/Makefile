@@ -14,6 +14,14 @@ saa716x_core-objs	:= saa716x_pci.o	\
 			   saa716x_rom.o	\
 			   saa716x_spi.o
 
-obj-$(CONFIG_VIDEO_SAA716X)  += saa716x_core.o saa716x_budget.o
+saa716x_ff-objs		:= saa716x_ff_main.o	\
+                           saa716x_ff_cmd.o	\
+			   saa716x_ff_ir.o
 
-EXTRA_CFLAGS = -Idrivers/media/dvb-core/ -Idrivers/media/dvb-frontends/ -Idrivers/media/tuners/ -Iinclude/media/
+obj-$(CONFIG_SAA716X_CORE)	  += saa716x_core.o
+obj-$(CONFIG_DVB_SAA716X_TBS)  += saa716x_tbs-dvb.o
+obj-$(CONFIG_DVB_SAA716X_HYBRID)  += saa716x_hybrid.o
+obj-$(CONFIG_DVB_SAA716X_FF)	  += saa716x_ff.o
+saa716x_tbs-dvb-objs += saa716x_budget.o tbsci-i2c.o tbs-ci.o
+
+EXTRA_CFLAGS = -Idrivers/media/dvb/dvb-core/ -Idrivers/media/dvb/frontends/ -Idrivers/media/dvb-core/ -Idrivers/media/dvb-frontends/ -Idrivers/media/tuners/

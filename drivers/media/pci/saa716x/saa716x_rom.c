@@ -30,7 +30,7 @@ static int eeprom_read_bytes(struct saa716x_dev *saa716x, u16 reg, u16 len, u8 *
 	return ret;
 }
 
-static int saa716x_read_rombytes(struct saa716x_dev *saa716x, u16 reg, u16 len, u8 *val)
+int saa716x_read_rombytes(struct saa716x_dev *saa716x, u16 reg, u16 len, u8 *val)
 {
 	struct saa716x_i2c *i2c		= saa716x->i2c;
 	struct i2c_adapter *adapter	= &i2c[SAA716x_I2C_BUS_B].i2c_adapter;
@@ -90,6 +90,8 @@ static int saa716x_read_rombytes(struct saa716x_dev *saa716x, u16 reg, u16 len, 
 	return 0;
 }
 
+EXPORT_SYMBOL_GPL(saa716x_read_rombytes);
+
 static int saa716x_get_offset(struct saa716x_dev *saa716x, u8 *buf, u32 *offset)
 {
 	int i;
@@ -99,7 +101,7 @@ static int saa716x_get_offset(struct saa716x_dev *saa716x, u8 *buf, u32 *offset)
 		if (!(strncmp("START", buf + i, 5)))
 			break;
 	}
-	dprintk(SAA716x_DEBUG, 1, "Offset @ %d", i);
+	dprintk(SAA716x_INFO, 1, "Offset @ %d", i);
 	*offset = i;
 
 	return 0;
@@ -113,7 +115,7 @@ static int saa716x_eeprom_header(struct saa716x_dev *saa716x,
 	memcpy(rom_header, &buf[*offset], sizeof (struct saa716x_romhdr));
 	if (rom_header->header_size != sizeof (struct saa716x_romhdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%zu bytes, Expected=%d",
+			"ERROR: Header size mismatch! Read size=%zd bytes, Expected=%d",
 			sizeof (struct saa716x_romhdr),
 			rom_header->header_size);
 
@@ -121,19 +123,19 @@ static int saa716x_eeprom_header(struct saa716x_dev *saa716x,
 	}
 	*offset += sizeof (struct saa716x_romhdr);
 
-	dprintk(SAA716x_DEBUG, 0, "SAA%02x ROM: Data=%d bytes\n",
+	dprintk(SAA716x_NOTICE, 0, "SAA%02x ROM: Data=%d bytes\n",
 		saa716x->pdev->device,
 		rom_header->data_size);
 
-	dprintk(SAA716x_DEBUG, 0, "SAA%02x ROM: Version=%d\n",
+	dprintk(SAA716x_NOTICE, 0, "SAA%02x ROM: Version=%d\n",
 		saa716x->pdev->device,
 		rom_header->version);
 
-	dprintk(SAA716x_DEBUG, 0, "SAA%02x ROM: Devices=%d\n",
+	dprintk(SAA716x_NOTICE, 0, "SAA%02x ROM: Devices=%d\n",
 		saa716x->pdev->device,
 		rom_header->devices);
 
-	dprintk(SAA716x_DEBUG, 0, "SAA%02x ROM: Compressed=%d\n\n",
+	dprintk(SAA716x_NOTICE, 0, "SAA%02x ROM: Compressed=%d\n\n",
 		saa716x->pdev->device,
 		rom_header->compression);
 
@@ -153,28 +155,28 @@ int saa716x_dump_eeprom(struct saa716x_dev *saa716x)
 		return err;
 	}
 
-	dprintk(SAA716x_DEBUG, 0, "    Card: %s\n",
+	dprintk(SAA716x_NOTICE, 0, "    Card: %s\n",
 		saa716x->config->model_name);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"    ---------------- SAA%02x ROM @ Offset 0x%02x ----------------",
 		saa716x->pdev->device,
 		DUMP_OFFST);
 
 	for (i = 0; i < DUMP_BYTES; i++) {
 		if ((i % 16) == 0) {
-			dprintk(SAA716x_DEBUG, 0, "\n    ");
-			dprintk(SAA716x_DEBUG, 0, "%04x: ", i);
+			dprintk(SAA716x_NOTICE, 0, "\n    ");
+			dprintk(SAA716x_NOTICE, 0, "%04x: ", i);
 		}
 
 		if ((i %  8) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
+			dprintk(SAA716x_NOTICE, 0, " ");
 		if ((i %  4) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
-		dprintk(SAA716x_DEBUG, 0, "%02x ", buf[i]);
+			dprintk(SAA716x_NOTICE, 0, " ");
+		dprintk(SAA716x_NOTICE, 0, "%02x ", buf[i]);
 	}
-	dprintk(SAA716x_DEBUG, 0, "\n");
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0, "\n");
+	dprintk(SAA716x_NOTICE, 0,
 		"    ---------------- SAA%02x ROM Dump end ---------------------\n\n",
 		saa716x->pdev->device);
 
@@ -205,25 +207,25 @@ static void saa716x_descriptor_dbg(struct saa716x_dev *saa716x,
 {
 	int i;
 
-	dprintk(SAA716x_DEBUG, 0, "       ");
+	dprintk(SAA716x_INFO, 0, "       ");
 	for (i = 0; i < 49; i++)
-		dprintk(SAA716x_DEBUG, 0, "-");
+		dprintk(SAA716x_INFO, 0, "-");
 
 	for (i = 0; i < size + ext_size; i++) {
 		if ((i % 16) == 0)
-			dprintk(SAA716x_DEBUG, 0, "\n      ");
+			dprintk(SAA716x_INFO, 0, "\n      ");
 		if ((i %  8) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
+			dprintk(SAA716x_INFO, 0, " ");
 		if ((i %  4) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
+			dprintk(SAA716x_INFO, 0, " ");
 
-		dprintk(SAA716x_DEBUG, 0, "%02x ", buf[*offset + i]);
+		dprintk(SAA716x_INFO, 0, "%02x ", buf[*offset + i]);
 	}
 
-	dprintk(SAA716x_DEBUG, 0, "\n       ");
+	dprintk(SAA716x_INFO, 0, "\n       ");
 	for (i = 0; i < 49; i++)
-		dprintk(SAA716x_DEBUG, 0, "-");
-	dprintk(SAA716x_DEBUG, 0, "\n");
+		dprintk(SAA716x_INFO, 0, "-");
+	dprintk(SAA716x_INFO, 0, "\n");
 
 }
 
@@ -237,19 +239,19 @@ static int saa716x_decoder_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_decoder_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_decoder_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext Data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -268,24 +270,24 @@ static int saa716x_gpio_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_gpio_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_gpio_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Pins=%d\n",
 		saa716x->pdev->device,
 		header.pins);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -305,69 +307,69 @@ static int saa716x_video_decoder_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_video_decoder_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_video_decoder_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: PORT 0=0x%02x\n",
 		saa716x->pdev->device,
 		header.video_port0);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: PORT 1=0x%02x\n",
 		saa716x->pdev->device,
 		header.video_port1);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: PORT 2=0x%02x\n",
 		saa716x->pdev->device,
 		header.video_port2);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: VBI PORT ID=0x%02x\n",
 		saa716x->pdev->device,
 		header.vbi_port_id);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Video PORT Type=0x%02x\n",
 		saa716x->pdev->device,
 		header.video_port_type);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: VBI PORT Type=0x%02x\n",
 		saa716x->pdev->device,
 		header.vbi_port_type);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Encoder PORT Type=0x%02x\n",
 		saa716x->pdev->device,
 		header.encoder_port_type);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Video Output=0x%02x\n",
 		saa716x->pdev->device,
 		header.video_output);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: VBI Output=0x%02x\n",
 		saa716x->pdev->device,
 		header.vbi_output);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Encoder Output=0x%02x\n",
 		saa716x->pdev->device,
 		header.encoder_output);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -386,19 +388,19 @@ static int saa716x_audio_decoder_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_audio_decoder_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_audio_decoder_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -417,18 +419,18 @@ static int saa716x_event_source_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_evsrc_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_evsrc_hdr));
 
 		return -1;
 	}
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -448,7 +450,7 @@ static int saa716x_crossbar_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_xbar_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_xbar_hdr));
 
@@ -457,17 +459,17 @@ static int saa716x_crossbar_info(struct saa716x_dev *saa716x,
 
 	memcpy(&pair_info, &buf[*offset], sizeof (struct saa716x_xbar_pair_info));
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Pairs=%d\n",
 		saa716x->pdev->device,
 		header.pair_inputs);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -486,18 +488,18 @@ static int saa716x_tuner_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_tuner_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_tuner_hdr));
 
 		return -1;
 	}
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -516,18 +518,18 @@ static int saa716x_pll_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_pll_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_pll_hdr));
 
 		return -1;
 	}
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -546,18 +548,18 @@ static int saa716x_channel_decoder_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_channel_decoder_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_channel_decoder_hdr));
 
 		return -1;
 	}
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -576,18 +578,18 @@ static int saa716x_encoder_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_encoder_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_encoder_hdr));
 
 		return -1;
 	}
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -606,19 +608,19 @@ static int saa716x_ir_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_ir_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_ir_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -637,19 +639,19 @@ static int saa716x_eeprom_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_eeprom_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_eeprom_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -668,19 +670,19 @@ static int saa716x_filter_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_filter_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_filter_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -699,19 +701,19 @@ static int saa716x_streamdev_info(struct saa716x_dev *saa716x,
 	saa716x_descriptor_dbg(saa716x, buf, offset, header.size, header.ext_data);
 	if (header.size != sizeof (struct saa716x_streamdev_hdr)) {
 		dprintk(SAA716x_ERROR, 1,
-			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zu",
+			"ERROR: Header size mismatch! Read size=%d bytes, Expected=%zd",
 			header.size,
 			sizeof (struct saa716x_streamdev_hdr));
 
 		return -1;
 	}
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		header.size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n",
 		saa716x->pdev->device,
 		header.ext_data);
@@ -733,12 +735,12 @@ static int saa716x_unknown_device_info(struct saa716x_dev *saa716x,
 
 	saa716x_descriptor_dbg(saa716x, buf, offset, size, ext_size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		size);
 
-	dprintk(SAA716x_DEBUG, 0,
+	dprintk(SAA716x_NOTICE, 0,
 		"        SAA%02x ROM: Ext data=%d bytes\n\n",
 		saa716x->pdev->device,
 		ext_size);
@@ -757,25 +759,25 @@ static void saa716x_device_dbg(struct saa716x_dev *saa716x,
 {
 	int i;
 
-	dprintk(SAA716x_DEBUG, 0, "   ");
+	dprintk(SAA716x_INFO, 0, "   ");
 	for (i = 0; i < 53; i++)
-		dprintk(SAA716x_DEBUG, 0, "-");
+		dprintk(SAA716x_INFO, 0, "-");
 
 	for (i = 0; i < size + ext_size + addr_size; i++) {
 		if ((i % 16) == 0)
-			dprintk(SAA716x_DEBUG, 0, "\n  ");
+			dprintk(SAA716x_INFO, 0, "\n  ");
 		if ((i %  8) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
+			dprintk(SAA716x_INFO, 0, " ");
 		if ((i %  4) == 0)
-			dprintk(SAA716x_DEBUG, 0, " ");
+			dprintk(SAA716x_INFO, 0, " ");
 
-		dprintk(SAA716x_DEBUG, 0, "%02x ", buf[*offset + i]);
+		dprintk(SAA716x_INFO, 0, "%02x ", buf[*offset + i]);
 	}
 
-	dprintk(SAA716x_DEBUG, 0, "\n   ");
+	dprintk(SAA716x_INFO, 0, "\n   ");
 	for (i = 0; i < 53; i++)
-		dprintk(SAA716x_DEBUG, 0, "-");
-	dprintk(SAA716x_DEBUG, 0, "\n");
+		dprintk(SAA716x_INFO, 0, "-");
+	dprintk(SAA716x_INFO, 0, "\n");
 
 }
 
@@ -789,7 +791,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 
 	memcpy(device, &buf[*offset], sizeof (struct saa716x_devinfo));
 	if (device->struct_size != sizeof (struct saa716x_devinfo)) {
-		dprintk(SAA716x_ERROR, 1, "ERROR: Device size mismatch! Read=%d bytes, expected=%zu bytes",
+		dprintk(SAA716x_ERROR, 1, "ERROR: Device size mismatch! Read=%d bytes, expected=%zd bytes",
 		device->struct_size,
 		sizeof (struct saa716x_devinfo));
 
@@ -811,47 +813,47 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 		*offset += device->addr_size;
 	}
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Device @ 0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Device @ 0x%02x\n",
 		saa716x->pdev->device,
 		address);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Size=%d bytes\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Size=%d bytes\n",
 		saa716x->pdev->device,
 		device->struct_size);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Device ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Device ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->device_id);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Master ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Master ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->master_devid);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Bus ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Bus ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->master_busid);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Device type=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Device type=0x%02x\n",
 		saa716x->pdev->device,
 		device->device_type);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Implementation ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Implementation ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->implem_id);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Path ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Path ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->path_id);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: GPIO ID=0x%02x\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: GPIO ID=0x%02x\n",
 		saa716x->pdev->device,
 		device->gpio_id);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Address=%d bytes\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Address=%d bytes\n",
 		saa716x->pdev->device,
 		device->addr_size);
 
-	dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: Extended data=%d bytes\n\n",
+	dprintk(SAA716x_NOTICE, 0, "    SAA%02x ROM: Extended data=%d bytes\n\n",
 		saa716x->pdev->device,
 		device->extd_data_size);
 
@@ -863,7 +865,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 			if (device->device_type & mask) {
 				switch (mask) {
 				case DECODER_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found decoder device\n",
 						saa716x->pdev->device);
 
@@ -871,7 +873,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case GPIO_SOURCE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found GPIO device\n",
 						saa716x->pdev->device);
 
@@ -879,7 +881,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case VIDEO_DECODER:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Video Decoder device\n",
 						saa716x->pdev->device);
 
@@ -887,7 +889,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case AUDIO_DECODER:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Audio Decoder device\n",
 						saa716x->pdev->device);
 
@@ -895,7 +897,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case EVENT_SOURCE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Event source\n",
 						saa716x->pdev->device);
 
@@ -903,7 +905,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case CROSSBAR:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Crossbar device\n",
 						saa716x->pdev->device);
 
@@ -911,7 +913,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case TUNER_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Tuner device\n",
 						saa716x->pdev->device);
 
@@ -919,7 +921,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case PLL_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found PLL device\n",
 						saa716x->pdev->device);
 
@@ -927,7 +929,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case CHANNEL_DECODER:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Channel Demodulator device\n",
 						saa716x->pdev->device);
 
@@ -935,7 +937,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case RDS_DECODER:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found RDS Decoder device\n",
 						saa716x->pdev->device);
 
@@ -943,7 +945,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case ENCODER_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Encoder device\n",
 						saa716x->pdev->device);
 
@@ -951,7 +953,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case IR_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found IR device\n",
 						saa716x->pdev->device);
 
@@ -959,7 +961,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case EEPROM_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found EEPROM device\n",
 						saa716x->pdev->device);
 
@@ -967,7 +969,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case NOISE_FILTER:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Noise filter device\n",
 						saa716x->pdev->device);
 
@@ -975,7 +977,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case LNx_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found LNx device\n",
 						saa716x->pdev->device);
 
@@ -983,7 +985,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case STREAM_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found streaming device\n",
 						saa716x->pdev->device);
 
@@ -991,7 +993,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				case CONFIGSPACE_DEVICE:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found Configspace device\n",
 						saa716x->pdev->device);
 
@@ -999,7 +1001,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 					break;
 
 				default:
-					dprintk(SAA716x_DEBUG, 0,
+					dprintk(SAA716x_NOTICE, 0,
 						"        SAA%02x ROM: Found unknown device\n",
 						saa716x->pdev->device);
 
@@ -1011,7 +1013,7 @@ static int saa716x_device_info(struct saa716x_dev *saa716x,
 		}
 	}
 
-	dprintk(SAA716x_DEBUG, 0, "\n");
+	dprintk(SAA716x_NOTICE, 0, "\n");
 
 	return 0;
 }
@@ -1021,51 +1023,65 @@ int saa716x_eeprom_data(struct saa716x_dev *saa716x)
 	struct saa716x_romhdr rom_header;
 	struct saa716x_devinfo *device;
 
-	u8 buf[1024];
+	u8 *buf;
 	int i, ret = 0;
 	u32 offset = 0;
 
+	buf = kmalloc(1024, GFP_KERNEL);
+	if (buf == NULL) {
+		dev_err(&saa716x->pdev->dev,
+			"%s: out of memory (buf)\n", __func__);
+		goto err;
+	}
+
 	/* dump */
-	ret = saa716x_read_rombytes(saa716x, saa716x->id_offst, saa716x->id_len + 8, buf);
+	ret = saa716x_read_rombytes(saa716x,
+		saa716x->id_offst, saa716x->id_len + 8, buf);
 	if (ret < 0) {
-		dprintk(SAA716x_ERROR, 1, "EEPROM Read error <%d>", ret);
+		dev_err(&saa716x->pdev->dev,
+			"%s: EEPROM read error <%d>", __func__, ret);
 		goto err0;
 	}
 
 	/* Get header */
 	ret = saa716x_eeprom_header(saa716x, &rom_header, buf, &offset);
 	if (ret != 0) {
-		dprintk(SAA716x_ERROR, 1, "ERROR: Header Read failed <%d>", ret);
+		dev_err(&saa716x->pdev->dev,
+			"%s: header read failed <%d>", __func__, ret);
 		goto err0;
 	}
 
 	/* allocate for device info */
-	device = kzalloc(sizeof (struct saa716x_devinfo) * rom_header.devices, GFP_KERNEL);
+	device = kzalloc(sizeof (struct saa716x_devinfo) * rom_header.devices,
+			GFP_KERNEL);
 	if (device == NULL) {
-		dprintk(SAA716x_ERROR, 1, "ERROR: out of memory");
+		dev_err(&saa716x->pdev->dev,
+			"%s: out of memory (device)", __func__);
 		goto err0;
 	}
 
 	for (i = 0; i < rom_header.devices; i++) {
-		dprintk(SAA716x_DEBUG, 0, "    SAA%02x ROM: ===== Device %d =====\n",
-			saa716x->pdev->device,
-			i);
+		dev_dbg(&saa716x->pdev->dev,
+			"%s: SAA%02x ROM: ===== Device %d =====\n",
+			__func__, saa716x->pdev->device, i);
 
 		ret = saa716x_device_info(saa716x, &device[i], buf, &offset);
 		if (ret != 0) {
-			dprintk(SAA716x_ERROR, 1, "ERROR: Device info read failed <%d>", ret);
+			dev_err(&saa716x->pdev->dev,
+				"%s: device info read failed <%d>", __func__, ret);
 			goto err1;
 		}
 	}
 
+	kfree(buf);
 	kfree(device);
-
 	return 0;
 
 err1:
 	kfree(device);
-
 err0:
+	kfree(buf);
+err:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(saa716x_eeprom_data);
