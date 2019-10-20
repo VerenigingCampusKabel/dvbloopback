@@ -1,79 +1,3 @@
---- drivers/media/dvb-frontends/Makefile	2019-10-19 01:25:55.372944614 +0200
-+++ drivers/media/dvb-frontends/Makefile	2019-10-19 01:27:26.850060945 +0200
-@@ -114,6 +114,9 @@
- obj-$(CONFIG_DVB_STV0910) += stv0910.o
- obj-$(CONFIG_DVB_STV6111) += stv6111.o
- obj-$(CONFIG_DVB_MXL5XX) += mxl5xx.o
-+obj-$(CONFIG_DVB_ISL6422) += isl6422.o
-+obj-$(CONFIG_DVB_STV091X) += stv091x.o
-+obj-$(CONFIG_DVB_TAS2101) += tas2101.o
- obj-$(CONFIG_DVB_SI2165) += si2165.o
- obj-$(CONFIG_DVB_A8293) += a8293.o
- obj-$(CONFIG_DVB_SP2) += sp2.o
---- drivers/media/dvb-frontends/Kconfig	2019-10-19 00:50:04.272120789 +0200
-+++ drivers/media/dvb-frontends/Kconfig	2019-10-19 00:48:35.314983103 +0200
-@@ -62,6 +62,28 @@
- 
- 	  Say Y when you want to support these frontends.
-
-+config DVB_ISL6422
-+	tristate "ISL6422[B] SEC controller"
-+	depends on DVB_CORE && I2C
-+	default m if !MEDIA_SUBDRV_AUTOSELECT
-+	help
-+	  A Dual SEC controller chip from Intersil
-+ 
-+config DVB_STV091X
-+	tristate "STV091x based"
-+	depends on DVB_CORE && I2C
-+	default m if !MEDIA_SUBDRV_AUTOSELECT
-+	help
-+	  DVB-S/S2/DSS Multistandard Professional/Broadcast demodulators.
-+	  Say Y when you want to support these frontends.
-+
-+config DVB_TAS2101
-+	tristate "Tmax TAS2101 based"
-+	depends on DVB_CORE && I2C
-+	default m if !MEDIA_SUBDRV_AUTOSELECT
-+	help
-+	Say Y when you want to support this frontend.
-+
- config DVB_M88DS3103
- 	tristate "Montage Technology M88DS3103"
- 	depends on DVB_CORE && I2C && I2C_MUX
---- drivers/media/tuners/Makefile	2018-01-28 22:20:33.000000000 +0100
-+++ drivers/media/tuners/Makefile	2019-10-19 02:06:40.221315218 +0200
-@@ -42,6 +42,8 @@
- obj-$(CONFIG_MEDIA_TUNER_MXL301RF) += mxl301rf.o
- obj-$(CONFIG_MEDIA_TUNER_QM1D1C0042) += qm1d1c0042.o
- obj-$(CONFIG_MEDIA_TUNER_M88RS6000T) += m88rs6000t.o
-+obj-$(CONFIG_MEDIA_TUNER_AV201X) += av201x.o
-+obj-$(CONFIG_MEDIA_TUNER_STV6120) += stv6120.o
- 
- ccflags-y += -I$(srctree)/drivers/media/dvb-core
- ccflags-y += -I$(srctree)/drivers/media/dvb-frontends
-
---- drivers/media/tuners/Kconfig	2019-10-19 02:07:36.674059151 +0200
-+++ drivers/media/tuners/Kconfig	2019-10-19 02:07:07.353673188 +0200
-@@ -277,4 +277,18 @@
- 	default m if !MEDIA_SUBDRV_AUTOSELECT
- 	help
- 	  Sharp QM1D1C0042 trellis coded 8PSK tuner driver.
-+
-+config MEDIA_TUNER_AV201X
-+	tristate "Airoha Technology AV201x silicon tuner"
-+	depends on MEDIA_SUPPORT && I2C
-+	default m if !MEDIA_SUBDRV_AUTOSELECT
-+	help
-+	  Airoha Technology AV201x silicon tuner driver.
-+
-+config MEDIA_TUNER_STV6120
-+	tristate "STV6120 silicon tuner"
-+	depends on MEDIA_SUPPORT && I2C
-+	default m if !MEDIA_SUBDRV_AUTOSELECT
-+	help
-+	  STV6120 silicon tuner driver.
- endmenu
 --- include/uapi/linux/dvb/frontend.h	2018-01-28 22:20:33.000000000 +0100
 +++ include/uapi/linux/dvb/frontend.h	2019-10-20 19:02:08.196376521 +0200
 @@ -313,6 +313,8 @@
@@ -263,3 +187,318 @@
  	case FE_SET_PROPERTY: {
  		struct dtv_properties *tvps = parg;
  		struct dtv_property *tvp = NULL;
+--- drivers/media/dvb-frontends/Makefile	2019-10-19 01:25:55.372944614 +0200
++++ drivers/media/dvb-frontends/Makefile	2019-10-19 01:27:26.850060945 +0200
+@@ -114,6 +114,9 @@
+ obj-$(CONFIG_DVB_STV0910) += stv0910.o
+ obj-$(CONFIG_DVB_STV6111) += stv6111.o
+ obj-$(CONFIG_DVB_MXL5XX) += mxl5xx.o
++obj-$(CONFIG_DVB_ISL6422) += isl6422.o
++obj-$(CONFIG_DVB_STV091X) += stv091x.o
++obj-$(CONFIG_DVB_TAS2101) += tas2101.o
+ obj-$(CONFIG_DVB_SI2165) += si2165.o
+ obj-$(CONFIG_DVB_A8293) += a8293.o
+ obj-$(CONFIG_DVB_SP2) += sp2.o
+--- drivers/media/dvb-frontends/Kconfig	2019-10-19 00:50:04.272120789 +0200
++++ drivers/media/dvb-frontends/Kconfig	2019-10-19 00:48:35.314983103 +0200
+@@ -62,6 +62,28 @@
+ 
+ 	  Say Y when you want to support these frontends.
+
++config DVB_ISL6422
++	tristate "ISL6422[B] SEC controller"
++	depends on DVB_CORE && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  A Dual SEC controller chip from Intersil
++ 
++config DVB_STV091X
++	tristate "STV091x based"
++	depends on DVB_CORE && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  DVB-S/S2/DSS Multistandard Professional/Broadcast demodulators.
++	  Say Y when you want to support these frontends.
++
++config DVB_TAS2101
++	tristate "Tmax TAS2101 based"
++	depends on DVB_CORE && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	Say Y when you want to support this frontend.
++
+ config DVB_M88DS3103
+ 	tristate "Montage Technology M88DS3103"
+ 	depends on DVB_CORE && I2C && I2C_MUX
+--- drivers/media/tuners/Makefile	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/tuners/Makefile	2019-10-19 02:06:40.221315218 +0200
+@@ -42,6 +42,8 @@
+ obj-$(CONFIG_MEDIA_TUNER_MXL301RF) += mxl301rf.o
+ obj-$(CONFIG_MEDIA_TUNER_QM1D1C0042) += qm1d1c0042.o
+ obj-$(CONFIG_MEDIA_TUNER_M88RS6000T) += m88rs6000t.o
++obj-$(CONFIG_MEDIA_TUNER_AV201X) += av201x.o
++obj-$(CONFIG_MEDIA_TUNER_STV6120) += stv6120.o
+ 
+ ccflags-y += -I$(srctree)/drivers/media/dvb-core
+ ccflags-y += -I$(srctree)/drivers/media/dvb-frontends
+
+--- drivers/media/tuners/Kconfig	2019-10-19 02:07:36.674059151 +0200
++++ drivers/media/tuners/Kconfig	2019-10-19 02:07:07.353673188 +0200
+@@ -277,4 +277,18 @@
+ 	default m if !MEDIA_SUBDRV_AUTOSELECT
+ 	help
+ 	  Sharp QM1D1C0042 trellis coded 8PSK tuner driver.
++
++config MEDIA_TUNER_AV201X
++	tristate "Airoha Technology AV201x silicon tuner"
++	depends on MEDIA_SUPPORT && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Airoha Technology AV201x silicon tuner driver.
++
++config MEDIA_TUNER_STV6120
++	tristate "STV6120 silicon tuner"
++	depends on MEDIA_SUPPORT && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  STV6120 silicon tuner driver.
+ endmenu
+--- drivers/media/dvb-frontends/cx24117.h	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/dvb-frontends/cx24117.h	2019-10-20 20:32:03.275026882 +0200
+@@ -30,6 +30,7 @@
+ };
+ 
+ #if IS_REACHABLE(CONFIG_DVB_CX24117)
++extern struct i2c_adapter *cx24117_get_i2c_adapter(struct dvb_frontend *fe);
+ extern struct dvb_frontend *cx24117_attach(
+ 	const struct cx24117_config *config,
+ 	struct i2c_adapter *i2c);
+--- drivers/media/dvb-frontends/cx24117.c	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/dvb-frontends/cx24117.c	2019-10-20 20:32:52.623676958 +0200
+@@ -265,6 +265,12 @@
+ 	 */
+ };
+ 
++struct i2c_adapter *cx24117_get_i2c_adapter(struct dvb_frontend *fe)
++{
++	struct cx24117_state *state = fe->demodulator_priv;
++	return state->priv->i2c;
++}
++EXPORT_SYMBOL_GPL(cx24117_get_i2c_adapter);
+ 
+ static int cx24117_writereg(struct cx24117_state *state, u8 reg, u8 data)
+ {
+--- drivers/media/dvb-frontends/cx24117.h	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/dvb-frontends/cx24117.h	2019-10-20 20:37:07.351028165 +0200
+@@ -27,9 +27,13 @@
+ struct cx24117_config {
+ 	/* the demodulator's i2c address */
+ 	u8 demod_address;
++
++	/* lnb power control */
++	void (*lnb_power)(struct dvb_frontend *fe, int demod, int onoff);
+ };
+ 
+ #if IS_REACHABLE(CONFIG_DVB_CX24117)
++extern struct i2c_adapter *cx24117_get_i2c_adapter(struct dvb_frontend *fe);
+ extern struct dvb_frontend *cx24117_attach(
+ 	const struct cx24117_config *config,
+ 	struct i2c_adapter *i2c);
+--- drivers/media/dvb-frontends/cx24117.c	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/dvb-frontends/cx24117.c	2019-10-20 20:52:20.411010427 +0200
+@@ -195,7 +195,7 @@
+ 
+ /* common to both fe's */
+ struct cx24117_priv {
+-	u8 demod_address;
++	struct cx24117_config *cfg;
+ 	struct i2c_adapter *i2c;
+ 	u8 skip_fw_load;
+ 	struct mutex fe_lock;
+@@ -265,11 +265,17 @@
+ 	 */
+ };
+ 
++struct i2c_adapter *cx24117_get_i2c_adapter(struct dvb_frontend *fe)
++{
++	struct cx24117_state *state = fe->demodulator_priv;
++	return state->priv->i2c;
++}
++EXPORT_SYMBOL_GPL(cx24117_get_i2c_adapter);
+ 
+ static int cx24117_writereg(struct cx24117_state *state, u8 reg, u8 data)
+ {
+ 	u8 buf[] = { reg, data };
+-	struct i2c_msg msg = { .addr = state->priv->demod_address,
++	struct i2c_msg msg = { .addr = state->priv->cfg->demod_address,
+ 		.flags = 0, .buf = buf, .len = 2 };
+ 	int ret;
+ 
+@@ -301,7 +307,7 @@
+ 	buf[0] = CX24117_REG_COMMAND;
+ 	memcpy(&buf[1], cmd->args, cmd->len);
+ 
+-	msg.addr = state->priv->demod_address;
++	msg.addr = state->priv->cfg->demod_address;
+ 	msg.flags = 0;
+ 	msg.len = cmd->len+1;
+ 	msg.buf = buf;
+@@ -320,9 +326,9 @@
+ 	int ret;
+ 	u8 recv = 0;
+ 	struct i2c_msg msg[] = {
+-		{ .addr = state->priv->demod_address, .flags = 0,
++		{ .addr = state->priv->cfg->demod_address, .flags = 0,
+ 			.buf = &reg, .len = 1 },
+-		{ .addr = state->priv->demod_address, .flags = I2C_M_RD,
++		{ .addr = state->priv->cfg->demod_address, .flags = I2C_M_RD,
+ 			.buf = &recv, .len = 1 }
+ 	};
+ 
+@@ -345,9 +351,9 @@
+ {
+ 	int ret;
+ 	struct i2c_msg msg[] = {
+-		{ .addr = state->priv->demod_address, .flags = 0,
++		{ .addr = state->priv->cfg->demod_address, .flags = 0,
+ 			.buf = &reg, .len = 1 },
+-		{ .addr = state->priv->demod_address, .flags = I2C_M_RD,
++		{ .addr = state->priv->cfg->demod_address, .flags = I2C_M_RD,
+ 			.buf = buf, .len = len }
+ 	};
+ 
+@@ -624,7 +630,7 @@
+ 	memcpy(&buf[1], fw->data, fw->size);
+ 
+ 	/* prepare i2c message to send */
+-	msg.addr = state->priv->demod_address;
++	msg.addr = state->priv->cfg->demod_address;
+ 	msg.flags = 0;
+ 	msg.len = fw->size + 1;
+ 	msg.buf = buf;
+@@ -632,6 +638,7 @@
+ 	/* send fw */
+ 	ret = i2c_transfer(state->priv->i2c, &msg, 1);
+ 	if (ret < 0)
++		kfree(buf);
+ 		return ret;
+ 
+ 	kfree(buf);
+@@ -793,7 +800,7 @@
+ {
+ 	struct cx24117_state *state = fe->demodulator_priv;
+ 	struct cx24117_cmd cmd;
+-	int ret;
++	int ret = 0;
+ 	u16 sig_reading;
+ 	u8 buf[2];
+ 	u8 reg = (state->demod == 0) ?
+@@ -919,6 +926,9 @@
+ 		voltage == SEC_VOLTAGE_18 ? "SEC_VOLTAGE_18" :
+ 		"SEC_VOLTAGE_OFF");
+ 
++	if (state->priv->cfg->lnb_power)
++		state->priv->cfg->lnb_power(fe, state->demod, 1);
++
+ 	/* Prepare a set GPIO logic level CMD */
+ 	cmd.args[0] = CMD_SET_GPIOOUT;
+ 	cmd.args[2] = reg; /* mask */
+@@ -950,8 +960,13 @@
+ 		msleep(20);
+ 	} else {
+ 		/* power off LNB */
+-		cmd.args[1] = 0x00;
+-		ret = cx24117_cmd_execute(fe, &cmd);
++		if (state->priv->cfg->lnb_power) {
++			state->priv->cfg->lnb_power(fe, state->demod, 0);
++		} else {
++			cmd.args[1] = 0x00;
++			ret = cx24117_cmd_execute(fe, &cmd);
++		}
++
+ 	}
+ 
+ 	return ret;
+@@ -1166,7 +1181,7 @@
+ 
+ static const struct dvb_frontend_ops cx24117_ops;
+ 
+-struct dvb_frontend *cx24117_attach(const struct cx24117_config *config,
++struct dvb_frontend *cx24117_attach(struct cx24117_config *config,
+ 	struct i2c_adapter *i2c)
+ {
+ 	struct cx24117_state *state = NULL;
+@@ -1186,7 +1201,7 @@
+ 	case 1:
+ 		/* new priv instance */
+ 		priv->i2c = i2c;
+-		priv->demod_address = config->demod_address;
++		priv->cfg = config;
+ 		mutex_init(&priv->fe_lock);
+ 		break;
+ 	default:
+--- drivers/media/tuners/tda18212.h	2019-10-20 20:19:48.861378376 +0200
++++ drivers/media/tuners/tda18212.h	2019-10-20 20:20:23.917837402 +0200
+@@ -34,6 +34,8 @@
+ 	u16 if_dvbc;
+ 	u16 if_atsc_vsb;
+ 	u16 if_atsc_qam;
++	u8 loop_through:1;
++	u8 xtout:1;
+ 
+ 	/*
+ 	 * pointer to DVB frontend
+--- drivers/media/tuners/tda18212.c	2019-10-20 20:25:29.577839241 +0200
++++ drivers/media/tuners/tda18212.c	2019-10-20 20:25:55.474178258 +0200
+@@ -95,6 +95,7 @@
+ 			ret = -EINVAL;
+ 			goto error;
+ 		}
++		buf[0] = 0x30;
+ 		break;
+ 	case SYS_DVBT2:
+ 		switch (c->bandwidth_hz) {
+@@ -114,11 +115,13 @@
+ 			ret = -EINVAL;
+ 			goto error;
+ 		}
++		buf[0] = 0x30;
+ 		break;
+ 	case SYS_DVBC_ANNEX_A:
+ 	case SYS_DVBC_ANNEX_C:
+ 		if_khz = dev->cfg.if_dvbc;
+ 		i = DVBC_8;
++		buf[0] = 0x00;
+ 		break;
+ 	default:
+ 		ret = -EINVAL;
+@@ -129,17 +132,28 @@
+ 	if (ret)
+ 		goto error;
+ 
++	ret = regmap_write(dev->regmap, 0x5f, 0x00);
++	if (ret)
++		goto error;
++
+ 	ret = regmap_write(dev->regmap, 0x06, 0x00);
+ 	if (ret)
+ 		goto error;
+ 
++	if (dev->cfg.loop_through)
++		buf[0] |= 0x80;
++
++	ret = regmap_write(dev->regmap, 0x0c, buf[0]);
++	if (ret)
++		goto error;
++
+ 	ret = regmap_write(dev->regmap, 0x0f, bw_params[i][0]);
+ 	if (ret)
+ 		goto error;
+ 
+ 	buf[0] = 0x02;
+ 	buf[1] = bw_params[i][1];
+-	buf[2] = 0x03; /* default value */
++	buf[2] = dev->cfg.xtout ? 0x43 : 0x40; /* 0x03; default value */
+ 	buf[3] = DIV_ROUND_CLOSEST(if_khz, 50);
+ 	buf[4] = ((c->frequency / 1000) >> 16) & 0xff;
+ 	buf[5] = ((c->frequency / 1000) >>  8) & 0xff;
