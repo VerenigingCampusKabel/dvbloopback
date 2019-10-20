@@ -1,0 +1,51 @@
+--- drivers/media/dvb-frontends/Makefile	2019-10-19 01:25:55.372944614 +0200
++++ drivers/media/dvb-frontends/Makefile	2019-10-19 01:27:26.850060945 +0200
+@@ -114,6 +114,7 @@
+ obj-$(CONFIG_DVB_STV0910) += stv0910.o
+ obj-$(CONFIG_DVB_STV6111) += stv6111.o
+ obj-$(CONFIG_DVB_MXL5XX) += mxl5xx.o
++obj-$(CONFIG_DVB_TAS2101) += tas2101.o
+ obj-$(CONFIG_DVB_SI2165) += si2165.o
+ obj-$(CONFIG_DVB_A8293) += a8293.o
+ obj-$(CONFIG_DVB_SP2) += sp2.o
+--- drivers/media/dvb-frontends/Kconfig	2019-10-19 00:50:04.272120789 +0200
++++ drivers/media/dvb-frontends/Kconfig	2019-10-19 00:48:35.314983103 +0200
+@@ -62,6 +62,13 @@
+ 
+ 	  Say Y when you want to support these frontends.
+ 
++config DVB_TAS2101
++	tristate "Tmax TAS2101 based"
++	depends on DVB_CORE && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	Say Y when you want to support this frontend.
++
+ config DVB_M88DS3103
+ 	tristate "Montage Technology M88DS3103"
+ 	depends on DVB_CORE && I2C && I2C_MUX
+--- drivers/media/tuners/Makefile	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/tuners/Makefile	2019-10-19 02:06:40.221315218 +0200
+@@ -42,6 +42,7 @@
+ obj-$(CONFIG_MEDIA_TUNER_MXL301RF) += mxl301rf.o
+ obj-$(CONFIG_MEDIA_TUNER_QM1D1C0042) += qm1d1c0042.o
+ obj-$(CONFIG_MEDIA_TUNER_M88RS6000T) += m88rs6000t.o
++obj-$(CONFIG_MEDIA_TUNER_AV201X) += av201x.o
+ 
+ ccflags-y += -I$(srctree)/drivers/media/dvb-core
+ ccflags-y += -I$(srctree)/drivers/media/dvb-frontends
+
+--- drivers/media/tuners/Kconfig	2019-10-19 02:07:36.674059151 +0200
++++ drivers/media/tuners/Kconfig	2019-10-19 02:07:07.353673188 +0200
+@@ -277,4 +277,11 @@
+ 	default m if !MEDIA_SUBDRV_AUTOSELECT
+ 	help
+ 	  Sharp QM1D1C0042 trellis coded 8PSK tuner driver.
++
++config MEDIA_TUNER_AV201X
++	tristate "Airoha Technology AV201x silicon tuner"
++	depends on MEDIA_SUPPORT && I2C
++	default m if !MEDIA_SUBDRV_AUTOSELECT
++	help
++	  Airoha Technology AV201x silicon tuner driver.
+ endmenu
