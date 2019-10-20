@@ -952,6 +952,8 @@ Makefile is patched for saa716x.
     fi
   fi
 
+  cp -f ../drivers/media/dvb-frontends/tas2101* drivers/media/dvb-frontends/
+  cp -f ../drivers/media/tuners/av201x* drivers/media/tuners/
   _patch 0 "../saa716x.patch"
 fi
 
@@ -1227,7 +1229,7 @@ Kernel configured.
       echo "CONFIG_DVB_SAA716X_TBS=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_SAA716X_HYBRID=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_SAA716X_FF=m" >> debian.*/config/config.common.ubuntu
-      
+
       echo "CONFIG_DVB_TAS2101=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_MEDIA_TUNER_AV201X=m" >> debian.*/config/config.common.ubuntu
     fi
