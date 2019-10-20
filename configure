@@ -1230,8 +1230,11 @@ Kernel configured.
       echo "CONFIG_DVB_SAA716X_HYBRID=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_SAA716X_FF=m" >> debian.*/config/config.common.ubuntu
 
+      echo "CONFIG_DVB_ISL6422=m" >> debian.*/config/config.common.ubuntu
+      echo "CONFIG_DVB_STV091X=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_TAS2101=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_MEDIA_TUNER_AV201X=m" >> debian.*/config/config.common.ubuntu
+      echo "CONFIG_MEDIA_TUNER_STV6120=m" >> debian.*/config/config.common.ubuntu
     fi
     fakeroot debian/rules updateconfigs
     UBUNTUKERNEL=$(echo `pwd` | awk -F/ '{print $NF}' | grep -o '[[:digit:]]\+\.[[:digit:]]\+')
