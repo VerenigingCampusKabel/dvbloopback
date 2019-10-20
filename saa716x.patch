@@ -75,3 +75,119 @@
 +	  STV6120 silicon tuner driver.
 
  endmenu
+--- include/uapi/linux/dvb/frontend.h	2018-01-28 22:20:33.000000000 +0100
++++ include/uapi/linux/dvb/frontend.h	2019-10-20 16:52:40.598804941 +0200
+@@ -1006,4 +1006,34 @@
+ 
+ #endif
+ 
++struct ecp3_info
++{
++	__u8 reg;
++	__u32 data;
++};
++
++struct mcu24cxx_info
++{
++	__u32 bassaddr;
++	__u8 reg;
++	__u32 data;
++};
++
++struct usbi2c_access
++{
++	__u8 chip_addr;
++	__u8 reg;
++	__u8 num;
++	__u8 buf[8];
++};
++
++#define FE_ECP3FW_READ    _IOR('o', 90, struct ecp3_info)
++#define FE_ECP3FW_WRITE   _IOW('o', 91, struct ecp3_info)
++
++#define FE_24CXX_READ    _IOR('o', 92, struct mcu24cxx_info)
++#define FE_24CXX_WRITE   _IOW('o', 93, struct mcu24cxx_info)
++
++#define FE_REGI2C_READ    _IOR('o', 94, struct usbi2c_access)
++#define FE_REGI2C_WRITE   _IOW('o', 95, struct usbi2c_access)
++
+ #endif /*_DVBFRONTEND_H_*/
+--- drivers/media/dvb-core/dvb_frontend.h	2018-01-28 22:20:33.000000000 +0100
++++ drivers/media/dvb-core/dvb_frontend.h	2019-10-20 17:14:31.016148610 +0200
+@@ -461,6 +461,15 @@
+ 
+ 	struct dvb_tuner_ops tuner_ops;
+ 	struct analog_demod_ops analog_ops;
++
++	void(*spi_read)( struct dvb_frontend *fe,struct ecp3_info *ecp3inf);
++	void(*spi_write)( struct dvb_frontend *fe,struct ecp3_info *ecp3inf);
++
++	void(*mcu_read)( struct dvb_frontend *fe,struct mcu24cxx_info *mcu24cxxinf);
++	void(*mcu_write)( struct dvb_frontend *fe,struct mcu24cxx_info *mcu24cxxinf);
++
++	void(*reg_i2cread)( struct dvb_frontend *fe,struct usbi2c_access *pi2cinf);
++	void(*reg_i2cwrite)( struct dvb_frontend *fe,struct usbi2c_access *pi2cinf);
+ };
+ 
+ #ifdef __DVB_CORE__
+--- drivers/media/dvb-core/dvb_frontend.c	2019-10-20 15:31:05.000000000 +0200
++++ drivers/media/dvb-core/dvb_frontend.c	2019-10-20 17:10:39.049092266 +0200
+@@ -2122,6 +2122,58 @@
+ 	dev_dbg(fe->dvb->device, "%s:\n", __func__);
+ 
+ 	switch (cmd) {
++
++	case FE_ECP3FW_READ:
++		//printk("FE_ECP3FW_READ *****************");
++		if (fe->ops.spi_read) {
++			struct ecp3_info *info = parg;	
++			fe->ops.spi_read(fe, info);
++		}
++		err = 0;
++		break;
++	case FE_ECP3FW_WRITE:
++		//printk("FE_ECP3FW_WRITE *****************");
++		if (fe->ops.spi_write) {
++			struct ecp3_info *info = parg;	
++			fe->ops.spi_write(fe, info);
++		
++		}
++		err = 0;
++		break;
++
++	case FE_24CXX_READ:
++		//printk("FE_24CXX_READ *****************");
++		if (fe->ops.mcu_read) {
++			struct mcu24cxx_info *info = parg;	
++			fe->ops.mcu_read(fe, info);
++		}
++		err = 0;
++		break;
++	case FE_24CXX_WRITE:
++		//printk("FE_24CXX_WRITE *****************");
++		if (fe->ops.mcu_write) {
++			struct mcu24cxx_info *info = parg;	
++			fe->ops.mcu_write(fe, info);
++		
++		}
++		err = 0;
++		break;
++	case FE_REGI2C_READ:
++		if (fe->ops.mcu_read) {
++			struct usbi2c_access *info = parg;	
++			fe->ops.reg_i2cread(fe, info);
++		}
++		err = 0;
++		break;
++	case FE_REGI2C_WRITE:
++		if (fe->ops.mcu_write) {
++			struct usbi2c_access *info = parg;	
++			fe->ops.reg_i2cwrite(fe, info);
++		
++		}
++		err = 0;
++		break;
++
+ 	case FE_SET_PROPERTY: {
+ 		struct dtv_properties *tvps = parg;
+ 		struct dtv_property *tvp = NULL;
