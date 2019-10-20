@@ -75,8 +75,17 @@
 +	  STV6120 silicon tuner driver.
  endmenu
 --- include/uapi/linux/dvb/frontend.h	2018-01-28 22:20:33.000000000 +0100
-+++ include/uapi/linux/dvb/frontend.h	2019-10-20 16:52:40.598804941 +0200
-@@ -1006,4 +1006,34 @@
++++ include/uapi/linux/dvb/frontend.h	2019-10-20 18:38:13.689636558 +0200
+@@ -313,6 +313,8 @@
+ 	FEC_3_5,
+ 	FEC_9_10,
+ 	FEC_2_5,
++	FEC_1_4,
++	FEC_1_3,
+ };
+ 
+ /**
+@@ -1006,4 +1008,34 @@
  
  #endif
  
@@ -112,7 +121,7 @@
 +
  #endif /*_DVBFRONTEND_H_*/
 --- drivers/media/dvb-core/dvb_frontend.h	2018-01-28 22:20:33.000000000 +0100
-+++ drivers/media/dvb-core/dvb_frontend.h	2019-10-20 17:14:31.016148610 +0200
++++ drivers/media/dvb-core/dvb_frontend.h	2019-10-20 18:30:32.303551961 +0200
 @@ -461,6 +461,15 @@
  
  	struct dvb_tuner_ops tuner_ops;
@@ -129,9 +138,60 @@
  };
  
  #ifdef __DVB_CORE__
---- drivers/media/dvb-core/dvb_frontend.c	2019-10-20 15:31:05.000000000 +0200
-+++ drivers/media/dvb-core/dvb_frontend.c	2019-10-20 17:10:39.049092266 +0200
-@@ -2122,6 +2122,58 @@
+@@ -591,6 +600,9 @@
+ 	/* Multistream specifics */
+ 	u32			stream_id;
+ 
++	/* Physical Layer Scrambling specifics */
++	u32			scrambling_sequence_index;
++
+ 	/* ATSC-MH specifics */
+ 	u8			atscmh_fic_ver;
+ 	u8			atscmh_parade_id;
+
+--- drivers/media/dvb-core/dvb_frontend.c	2019-10-19 01:53:02.000000000 +0200
++++ drivers/media/dvb-core/dvb_frontend.c	2019-10-20 18:32:21.768999701 +0200
+@@ -989,6 +989,7 @@
+ 	}
+ 
+ 	c->stream_id = NO_STREAM_ID_FILTER;
++	c->scrambling_sequence_index = 0;/* default sequence */
+ 
+ 	switch (c->delivery_system) {
+ 	case SYS_DVBS:
+@@ -1079,6 +1080,7 @@
+ 
+ 	_DTV_CMD(DTV_STREAM_ID, 1, 0),
+ 	_DTV_CMD(DTV_DVBT2_PLP_ID_LEGACY, 1, 0),
++	_DTV_CMD(DTV_SCRAMBLING_SEQUENCE_INDEX, 1, 0),
+ 	_DTV_CMD(DTV_LNA, 1, 0),
+ 
+ 	/* Get */
+@@ -1424,6 +1426,11 @@
+ 		tvp->u.data = c->stream_id;
+ 		break;
+ 
++	/* Physical layer scrambling support */
++	case DTV_SCRAMBLING_SEQUENCE_INDEX:
++		tvp->u.data = c->scrambling_sequence_index;
++		break;
++
+ 	/* ATSC-MH */
+ 	case DTV_ATSCMH_FIC_VER:
+ 		tvp->u.data = fe->dtv_property_cache.atscmh_fic_ver;
+@@ -1907,6 +1914,11 @@
+ 		c->stream_id = data;
+ 		break;
+ 
++	/* Physical layer scrambling support */
++	case DTV_SCRAMBLING_SEQUENCE_INDEX:
++		c->scrambling_sequence_index = data;
++		break;
++
+ 	/* ATSC-MH */
+ 	case DTV_ATSCMH_PARADE_ID:
+ 		fe->dtv_property_cache.atscmh_parade_id = data;
+@@ -2122,6 +2134,58 @@
  	dev_dbg(fe->dvb->device, "%s:\n", __func__);
  
  	switch (cmd) {
