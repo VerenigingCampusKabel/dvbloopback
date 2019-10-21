@@ -1225,7 +1225,7 @@ Kernel configured.
       echo "CONFIG_SAA716X_CORE=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_SAA716X_TBS=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_SAA716X_HYBRID=m" >> debian.*/config/config.common.ubuntu
-      echo "CONFIG_DVB_SAA716X_FF=m" >> debian.*/config/config.common.ubuntu
+      echo "CONFIG_DVB_SAA716X_FF=n" >> debian.*/config/config.common.ubuntu
 
       echo "CONFIG_DVB_ISL6422=m" >> debian.*/config/config.common.ubuntu
       echo "CONFIG_DVB_STV091X=m" >> debian.*/config/config.common.ubuntu
