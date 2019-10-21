@@ -539,8 +539,8 @@ static int get_rf_strength(struct dvb_frontend *fe, u16 *agc)
 static struct dvb_tuner_ops tuner_ops = {
 	.info = {
 		.name = "STV6120",
-		.frequency_min  =  250000000,
-		.frequency_max  = 2300000000,
+		.frequency_min  =  250000,
+		.frequency_max  = 2300000,
 	},
 	.init              = init,
 	.sleep             = sleep,

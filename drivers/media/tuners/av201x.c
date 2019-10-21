@@ -259,8 +259,8 @@ static int av201x_get_rf_strength(struct dvb_frontend *fe, u16 *st)
 static const struct dvb_tuner_ops av201x_tuner_ops = {
 	.info = {
 		.name           = "Airoha Technology AV201x",
-		.frequency_min = 850000000,
-		.frequency_max = 2300000000,
+		.frequency_min = 850000,
+		.frequency_max = 2300000,
 	},
 
 	.release = av201x_release,
