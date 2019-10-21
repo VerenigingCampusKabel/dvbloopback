@@ -264,8 +264,8 @@
 +	  STV6120 silicon tuner driver.
  endmenu
 --- drivers/media/dvb-frontends/cx24117.h	2018-01-28 22:20:33.000000000 +0100
-+++ drivers/media/dvb-frontends/cx24117.h	2019-10-20 20:37:07.351028165 +0200
-@@ -27,9 +27,13 @@
++++ drivers/media/dvb-frontends/cx24117.h	2019-10-21 15:02:13.732139892 +0200
+@@ -27,15 +27,19 @@
  struct cx24117_config {
  	/* the demodulator's i2c address */
  	u8 demod_address;
@@ -277,8 +277,16 @@
  #if IS_REACHABLE(CONFIG_DVB_CX24117)
 +extern struct i2c_adapter *cx24117_get_i2c_adapter(struct dvb_frontend *fe);
  extern struct dvb_frontend *cx24117_attach(
- 	const struct cx24117_config *config,
+-	const struct cx24117_config *config,
++	struct cx24117_config *config,
  	struct i2c_adapter *i2c);
+ #else
+ static inline struct dvb_frontend *cx24117_attach(
+-	const struct cx24117_config *config,
++	struct cx24117_config *config,
+ 	struct i2c_adapter *i2c)
+ {
+ 	dev_warn(&i2c->dev, "%s: driver disabled by Kconfig\n", __func__);
 --- drivers/media/dvb-frontends/cx24117.c	2018-01-28 22:20:33.000000000 +0100
 +++ drivers/media/dvb-frontends/cx24117.c	2019-10-20 20:52:20.411010427 +0200
 @@ -195,7 +195,7 @@
