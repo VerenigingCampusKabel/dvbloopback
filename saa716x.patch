@@ -288,7 +288,7 @@
  {
  	dev_warn(&i2c->dev, "%s: driver disabled by Kconfig\n", __func__);
 --- drivers/media/dvb-frontends/cx24117.c	2018-01-28 22:20:33.000000000 +0100
-+++ drivers/media/dvb-frontends/cx24117.c	2019-10-20 20:52:20.411010427 +0200
++++ drivers/media/dvb-frontends/cx24117.c	2019-10-21 22:36:41.049436044 +0200
 @@ -195,7 +195,7 @@
  
  /* common to both fe's */
@@ -350,7 +350,7 @@
  			.buf = buf, .len = len }
  	};
  
-@@ -624,7 +630,7 @@
+@@ -624,15 +630,17 @@
  	memcpy(&buf[1], fw->data, fw->size);
  
  	/* prepare i2c message to send */
@@ -359,24 +359,27 @@
  	msg.flags = 0;
  	msg.len = fw->size + 1;
  	msg.buf = buf;
-@@ -632,6 +638,7 @@
+ 
  	/* send fw */
  	ret = i2c_transfer(state->priv->i2c, &msg, 1);
- 	if (ret < 0)
+-	if (ret < 0)
++	if (ret < 0) {
 +		kfree(buf);
  		return ret;
++	}
  
  	kfree(buf);
-@@ -793,7 +800,7 @@
+ 
+@@ -910,7 +918,7 @@
  {
  	struct cx24117_state *state = fe->demodulator_priv;
  	struct cx24117_cmd cmd;
 -	int ret;
 +	int ret = 0;
- 	u16 sig_reading;
- 	u8 buf[2];
- 	u8 reg = (state->demod == 0) ?
-@@ -919,6 +926,9 @@
+ 	u8 reg = (state->demod == 0) ? 0x10 : 0x20;
+ 
+ 	dev_dbg(&state->priv->i2c->dev, "%s() demod%d %s\n",
+@@ -919,6 +927,9 @@
  		voltage == SEC_VOLTAGE_18 ? "SEC_VOLTAGE_18" :
  		"SEC_VOLTAGE_OFF");
  
@@ -386,7 +389,7 @@
  	/* Prepare a set GPIO logic level CMD */
  	cmd.args[0] = CMD_SET_GPIOOUT;
  	cmd.args[2] = reg; /* mask */
-@@ -950,8 +960,13 @@
+@@ -950,8 +961,13 @@
  		msleep(20);
  	} else {
  		/* power off LNB */
@@ -402,7 +405,7 @@
  	}
  
  	return ret;
-@@ -1166,7 +1181,7 @@
+@@ -1166,7 +1182,7 @@
  
  static const struct dvb_frontend_ops cx24117_ops;
  
@@ -411,7 +414,7 @@
  	struct i2c_adapter *i2c)
  {
  	struct cx24117_state *state = NULL;
-@@ -1186,7 +1201,7 @@
+@@ -1186,7 +1202,7 @@
  	case 1:
  		/* new priv instance */
  		priv->i2c = i2c;
@@ -420,68 +423,3 @@
  		mutex_init(&priv->fe_lock);
  		break;
  	default:
---- drivers/media/tuners/tda18212.h	2019-10-20 20:19:48.861378376 +0200
-+++ drivers/media/tuners/tda18212.h	2019-10-20 20:20:23.917837402 +0200
-@@ -34,6 +34,8 @@
- 	u16 if_dvbc;
- 	u16 if_atsc_vsb;
- 	u16 if_atsc_qam;
-+	u8 loop_through:1;
-+	u8 xtout:1;
- 
- 	/*
- 	 * pointer to DVB frontend
---- drivers/media/tuners/tda18212.c	2019-10-20 20:25:29.577839241 +0200
-+++ drivers/media/tuners/tda18212.c	2019-10-20 20:25:55.474178258 +0200
-@@ -95,6 +95,7 @@
- 			ret = -EINVAL;
- 			goto error;
- 		}
-+		buf[0] = 0x30;
- 		break;
- 	case SYS_DVBT2:
- 		switch (c->bandwidth_hz) {
-@@ -114,11 +115,13 @@
- 			ret = -EINVAL;
- 			goto error;
- 		}
-+		buf[0] = 0x30;
- 		break;
- 	case SYS_DVBC_ANNEX_A:
- 	case SYS_DVBC_ANNEX_C:
- 		if_khz = dev->cfg.if_dvbc;
- 		i = DVBC_8;
-+		buf[0] = 0x00;
- 		break;
- 	default:
- 		ret = -EINVAL;
-@@ -129,17 +132,28 @@
- 	if (ret)
- 		goto error;
- 
-+	ret = regmap_write(dev->regmap, 0x5f, 0x00);
-+	if (ret)
-+		goto error;
-+
- 	ret = regmap_write(dev->regmap, 0x06, 0x00);
- 	if (ret)
- 		goto error;
- 
-+	if (dev->cfg.loop_through)
-+		buf[0] |= 0x80;
-+
-+	ret = regmap_write(dev->regmap, 0x0c, buf[0]);
-+	if (ret)
-+		goto error;
-+
- 	ret = regmap_write(dev->regmap, 0x0f, bw_params[i][0]);
- 	if (ret)
- 		goto error;
- 
- 	buf[0] = 0x02;
- 	buf[1] = bw_params[i][1];
--	buf[2] = 0x03; /* default value */
-+	buf[2] = dev->cfg.xtout ? 0x43 : 0x40; /* 0x03; default value */
- 	buf[3] = DIV_ROUND_CLOSEST(if_khz, 50);
- 	buf[4] = ((c->frequency / 1000) >> 16) & 0xff;
- 	buf[5] = ((c->frequency / 1000) >>  8) & 0xff;
