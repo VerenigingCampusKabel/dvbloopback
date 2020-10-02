@@ -682,9 +682,9 @@ static struct tda18212_config tda18212_config[] = {
 		.if_dvbt2_6 = 3250,
 		.if_dvbt2_7 = 4000,
 		.if_dvbt2_8 = 4000,
-		.if_dvbc = 5000,
-		.loop_through = 1,
-		.xtout = 1
+		.if_dvbc = 5000
+		// .loop_through = 1,
+		// .xtout = 1
 	},
 	{
 		/* .i2c_address = 0x63  (0xc6 >> 1) */
@@ -694,9 +694,9 @@ static struct tda18212_config tda18212_config[] = {
 		.if_dvbt2_6 = 3250,
 		.if_dvbt2_7 = 4000,
 		.if_dvbt2_8 = 4000,
-		.if_dvbc = 5000,
-		.loop_through = 0,
-		.xtout = 0
+		.if_dvbc = 5000
+		// .loop_through = 0,
+		// .xtout = 0
 	},
 };
 
